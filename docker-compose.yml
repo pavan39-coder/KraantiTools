@@ -1,0 +1,27 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      SERVER_ADDRESS: 0.0.0.0
+      APP_CORS_ALLOWED_ORIGINS: http://localhost:5173
+      MAX_UPLOAD_SIZE: 25MB
+      MAX_REQUEST_SIZE: 26MB
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8080/api/v1/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+  web:
+    build:
+      context: ./frontend
+      args:
+        SITE_URL: ${SITE_URL:-}
+    ports:
+      - "5173:80"
+    depends_on:
+      backend:
+        condition: service_healthy
